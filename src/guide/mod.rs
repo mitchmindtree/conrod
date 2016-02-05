@@ -60,7 +60,9 @@
 [2.2]:      ./chapter_2/index.html#installing-freetype
 [2.3]:      ./chapter_2/index.html#running-the-conrod-examples
 
+
 */
 
 pub mod chapter_1;
 pub mod chapter_2;
+pub mod chapter_3;
