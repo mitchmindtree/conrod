@@ -20,7 +20,8 @@
     - [Installing Rust and Cargo][2.1]
     - [Installing FreeType][2.2]
     - [Running the Conrod Examples][2.3]
-3. **Let's Create a GUI**
+3. **Creating a Simple GUI**
+    - Creating a New Project
     - Setup a Basic Window (using piston_window)
     - Conrod Setup
     - Instantiating Widgets
