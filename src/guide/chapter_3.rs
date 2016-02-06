@@ -100,7 +100,7 @@ fn main() {
 ```
 
 Note the `#[macro_use]` attribute before the conrod crate. This is so that we can use a macro
-provided by conrod for statically generating `WidgetId`s - but more on that later.
+provided by conrod for statically generating `WidgetId`s - but we'll cover more on that later!
 
 We'll instantiate a `PistonWindow`:
 
@@ -111,27 +111,96 @@ We'll instantiate a `PistonWindow`:
 use piston_window::{PistonWindow, WindowSettings};
 
 fn main() {
+#     return;
     // Construct the window.
     let window: PistonWindow =
         WindowSettings::new("Simple GUI", [800, 600])
             .exit_on_esc(true) // Finish the event loop when `Esc` is pressed
-            .vsync(true) // Turn on vertical sync https://en.wikipedia.org/wiki/Screen_tearing#V-sync
-            .samples(4) // Use 4 samples when anti-aliasing https://en.wikipedia.org/wiki/Multisample_anti-aliasing
+            .vsync(true) // Turn on vertical sync
+            .samples(4) // Use multi-sample anti-aliasing
             .build() // Build the `PistonWindow` from these settings.
             .unwrap(); // Don't worry about handling errors for now.
 }
 ```
 
 You'll notice that the `WindowSettings` uses a chain of optional methods ending in a call to
-`.build()` - for more information on this pattern, see [the Builder Pattern] section in chapter 1.
+`.build()` - for more information on how this pattern works, see [the Builder Pattern] section in
+chapter 1.
 
-Now that we've built our `window`, we'll want to run it in a loop
+Now that we've built our `window`, we should start polling it for events.
+
+```
+# #[macro_use] extern crate conrod;
+# extern crate find_folder;
+# extern crate piston_window;
+# use piston_window::{EventLoop, PistonWindow, WindowSettings};
+# 
+# fn main() {
+#     return; // This is just so that the tests return before opening the window and looping
+#     // Construct the window.
+#     let window: PistonWindow =
+#         WindowSettings::new("Simple GUI", [800, 600])
+#             .exit_on_esc(true) // Finish the event loop when `Esc` is pressed
+#             .vsync(true) // Turn on vertical sync
+#             .samples(4) // Use multi-sample anti-aliasing
+#             .build() // Build the `PistonWindow` from these settings.
+#             .unwrap(); // Don't worry about handling errors for now.
+// Kick off the event loop, yielding 60 `Update`s per second.
+for event in window.ups(60) {
+    // This is where we'll respond to each event
+}
+# }
+```
+
+The `ups` method comes from the `EventLoop` trait - we'll need to import it too.
+
+```
+# extern crate piston_window;
+use piston_window::{EventLoop, PistonWindow, WindowSettings};
+```
+
+Okydoke, feel free to run this if you haven't already! We should now have an empty window, ripe for
+a GUI. Your main.rs should look like this:
+
+```
+#[macro_use] extern crate conrod;
+extern crate find_folder;
+extern crate piston_window;
+use piston_window::{EventLoop, PistonWindow, WindowSettings};
+
+fn main() {
+    # return; // This is just so that the tests return before opening the window and looping
+
+    // Construct the window.
+    let window: PistonWindow =
+        WindowSettings::new("Simple GUI", [800, 600])
+            .exit_on_esc(true) // Finish the event loop when `Esc` is pressed
+            .vsync(true) // Turn on vertical sync
+            .samples(4) // Use multi-sample anti-aliasing
+            .build() // Build the `PistonWindow` from these settings.
+            .unwrap(); // Don't worry about handling errors for now.
+
+    // Kick off the event loop, yielding 60 `Update`s per second.
+    for event in window.ups(60) {
+        // This is where we'll respond to each event
+    }
+}
+```
 
 
+## Setting Up The `Ui`
 
-[Getting Started]:          ../chapter_2/index.html                         "Chapter 2: Getting Started"
+Now that the window's ready, we can begin setting up our GUI.
+
+Every conrod GUI requires an instance of a `Ui`. The `Ui` can be thought of 
+
+
+[Getting Started]:      ../chapter_2/index.html                     "Chapter 2: Getting Started"
+[the Builder Pattern]:  ../chapter_1/index.html#the-builder-pattern "The Builder Pattern"
+
 [Conrod NotoSans Fonts]:    https://github.com/PistonDevelopers/conrod/tree/master/assets/fonts/NotoSans    "NotoSans"
-[the Builder Pattern]:      ../chapter_1/index.html#the-builder-pattern     "The Builder Pattern"
+
+[Ui]:   ../../struct.Ui.html    "Ui"
 
 */
 
