@@ -20,8 +20,8 @@ edition = "2018"
 conrod_core = { path = "../../conrod_core", version = "0.63" }
 #vulkano = "0.11"
 #vulkano-shaders = "0.11"
-vulkano = { git = "https://github.com/vulkano-rs/vulkano", branch = "master" }
-vulkano-shaders = { git = "https://github.com/vulkano-rs/vulkano", branch = "master" }
+vulkano = { git = "https://github.com/mitchmindtree/vulkano", branch = "initialize_image_layouts" }
+vulkano-shaders = { git = "https://github.com/mitchmindtree/vulkano", branch = "initialize_image_layouts" }
 
 [dev-dependencies]
 conrod_example_shared = { path = "../conrod_example_shared", version = "0.63" }
@@ -29,5 +29,5 @@ conrod_winit = { path = "../conrod_winit", version = "0.63" }
 find_folder = "0.3"
 image = "0.21"
 #vulkano-win = "0.11"
-vulkano-win = { git = "https://github.com/vulkano-rs/vulkano", branch = "master" }
+vulkano-win = { git = "https://github.com/mitchmindtree/vulkano", branch = "initialize_image_layouts" }
 winit = "0.19"
