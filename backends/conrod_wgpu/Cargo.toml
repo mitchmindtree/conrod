@@ -16,7 +16,8 @@ edition = "2018"
 
 [dependencies]
 conrod_core = { path = "../../conrod_core", version = "0.68" }
-wgpu = "0.4"
+#wgpu = "0.4"
+wgpu = { git = "https://github.com/gfx-rs/wgpu-rs", branch = "master" }
 
 [dev-dependencies]
 conrod_example_shared = { path = "../conrod_example_shared", version = "0.68" }

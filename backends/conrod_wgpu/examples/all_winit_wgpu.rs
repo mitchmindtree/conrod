@@ -34,9 +34,8 @@ fn main() {
     // Select an adapter and gpu device.
     let adapter_opts = wgpu::RequestAdapterOptions {
         power_preference: wgpu::PowerPreference::Default,
-        backends: wgpu::BackendBit::PRIMARY,
     };
-    let adapter = wgpu::Adapter::request(&adapter_opts).unwrap();
+    let adapter = wgpu::Adapter::request(&adapter_opts, wgpu::BackendBit::PRIMARY).unwrap();
     let extensions = wgpu::Extensions {
         anisotropic_filtering: false,
     };
@@ -97,6 +96,7 @@ fn main() {
     let mut app = conrod_example_shared::DemoApp::new(rust_logo);
 
     event_loop.run(move |event, _, control_flow| {
+        println!("{:?}", event);
         if let Some(event) = convert_event(&event, &window) {
             ui.handle_event(event);
         }
@@ -151,7 +151,9 @@ fn main() {
                 };
 
                 // The window frame that we will draw to.
-                let frame = swap_chain.get_next_texture();
+                let frame = swap_chain
+                    .get_next_texture()
+                    .expect("timed out waiting for swap chain texture");
 
                 // Begin encoding commands.
                 let cmd_encoder_desc = wgpu::CommandEncoderDescriptor { todo: 0 };
@@ -187,27 +189,29 @@ fn main() {
                         color_attachments: &[color_attachment_desc],
                         depth_stencil_attachment: None,
                     };
-                    let mut render_pass = encoder.begin_render_pass(&render_pass_desc);
 
                     let render = renderer.render(&device, &image_map);
-                    render_pass.set_pipeline(render.pipeline);
-                    render_pass.set_vertex_buffers(0, &[(&render.vertex_buffer, 0)]);
-                    let instance_range = 0..1;
-                    for cmd in render.commands {
-                        match cmd {
-                            conrod_wgpu::RenderPassCommand::SetBindGroup { bind_group } => {
-                                render_pass.set_bind_group(0, bind_group, &[]);
-                            }
-                            conrod_wgpu::RenderPassCommand::SetScissor {
-                                top_left,
-                                dimensions,
-                            } => {
-                                let [x, y] = top_left;
-                                let [w, h] = dimensions;
-                                render_pass.set_scissor_rect(x, y, w, h);
-                            }
-                            conrod_wgpu::RenderPassCommand::Draw { vertex_range } => {
-                                render_pass.draw(vertex_range, instance_range.clone());
+                    {
+                        let mut render_pass = encoder.begin_render_pass(&render_pass_desc);
+                        render_pass.set_pipeline(render.pipeline);
+                        render_pass.set_vertex_buffers(0, &[(&render.vertex_buffer, 0)]);
+                        let instance_range = 0..1;
+                        for cmd in render.commands {
+                            match cmd {
+                                conrod_wgpu::RenderPassCommand::SetBindGroup { bind_group } => {
+                                    render_pass.set_bind_group(0, bind_group, &[]);
+                                }
+                                conrod_wgpu::RenderPassCommand::SetScissor {
+                                    top_left,
+                                    dimensions,
+                                } => {
+                                    let [x, y] = top_left;
+                                    let [w, h] = dimensions;
+                                    render_pass.set_scissor_rect(x, y, w, h);
+                                }
+                                conrod_wgpu::RenderPassCommand::Draw { vertex_range } => {
+                                    render_pass.draw(vertex_range, instance_range.clone());
+                                }
                             }
                         }
                     }
@@ -268,9 +272,7 @@ fn create_logo_texture(
 
     // Upload the pixel data.
     let data = &image.into_raw()[..];
-    let buffer = device
-        .create_buffer_mapped(data.len(), wgpu::BufferUsage::COPY_SRC)
-        .fill_from_slice(data);
+    let buffer = device.create_buffer_with_data(data, wgpu::BufferUsage::COPY_SRC);
 
     // Submit command for copying pixel data to the texture.
     let pixel_size_bytes = 4; // Rgba8, as above.

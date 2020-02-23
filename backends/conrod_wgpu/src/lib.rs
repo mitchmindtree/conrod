@@ -260,10 +260,9 @@ impl Renderer {
 
         // Prepare a single vertex buffer containing all vertices for all geometry.
         let vertices = self.mesh.vertices();
-        let vertices = conv_vertex_buffer(vertices);
-        let vertex_buffer = device
-            .create_buffer_mapped(vertices.len(), wgpu::BufferUsage::VERTEX)
-            .fill_from_slice(vertices);
+        let vertices_bytes = slice_as_bytes(vertices);
+        let vertex_buffer =
+            device.create_buffer_with_data(&vertices_bytes, wgpu::BufferUsage::VERTEX);
 
         // Keep track of the currently set bind group.
         #[derive(PartialEq)]
@@ -354,10 +353,8 @@ impl<'a> GlyphCacheCommand<'a> {
     /// > if you try to map an existing buffer, it will give it to you only after all the gpu use
     /// > of the buffer is over. So you can't do it every frame reasonably
     pub fn create_buffer(&self, device: &wgpu::Device) -> wgpu::Buffer {
-        let len = self.glyph_cache_pixel_buffer.len();
-        device
-            .create_buffer_mapped(len, wgpu::BufferUsage::COPY_SRC)
-            .fill_from_slice(&self.glyph_cache_pixel_buffer)
+        let pixel_data = slice_as_bytes(&self.glyph_cache_pixel_buffer);
+        device.create_buffer_with_data(pixel_data, wgpu::BufferUsage::COPY_SRC)
     }
 
     /// Create the copy view ready for copying the pixel data to the texture.
@@ -625,6 +622,10 @@ fn render_pipeline(
     device.create_render_pipeline(&desc)
 }
 
-fn conv_vertex_buffer(buffer: &[mesh::Vertex]) -> &[Vertex] {
-    unsafe { std::mem::transmute(buffer) }
+fn slice_as_bytes<T>(s: &[T]) -> &[u8] {
+    let len = std::mem::size_of::<T>() * s.len();
+    let ptr = s.as_ptr() as *const u8;
+    unsafe {
+        std::slice::from_raw_parts(ptr, len)
+    }
 }
