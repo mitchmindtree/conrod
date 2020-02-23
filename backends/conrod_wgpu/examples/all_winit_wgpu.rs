@@ -96,7 +96,6 @@ fn main() {
     let mut app = conrod_example_shared::DemoApp::new(rust_logo);
 
     event_loop.run(move |event, _, control_flow| {
-        println!("{:?}", event);
         if let Some(event) = convert_event(&event, &window) {
             ui.handle_event(event);
         }
@@ -190,8 +189,7 @@ fn main() {
                         depth_stencil_attachment: None,
                     };
 
-                    let render = renderer.render(&device, &image_map);
-                    {
+                    if let Some(render) = renderer.render(&device, &image_map) {
                         let mut render_pass = encoder.begin_render_pass(&render_pass_desc);
                         render_pass.set_pipeline(render.pipeline);
                         render_pass.set_vertex_buffers(0, &[(&render.vertex_buffer, 0)]);

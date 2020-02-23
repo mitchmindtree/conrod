@@ -107,11 +107,7 @@ impl mesh::ImageDimensions for Image {
 
 impl Renderer {
     /// Construct a new `Renderer`.
-    pub fn new(
-        device: &wgpu::Device,
-        msaa_samples: u32,
-        dst_format: wgpu::TextureFormat,
-    ) -> Self {
+    pub fn new(device: &wgpu::Device, msaa_samples: u32, dst_format: wgpu::TextureFormat) -> Self {
         let glyph_cache_dims = mesh::DEFAULT_GLYPH_CACHE_DIMS;
         Self::with_glyph_cache_dimensions(device, msaa_samples, dst_format, glyph_cache_dims)
     }
@@ -239,8 +235,18 @@ impl Renderer {
     /// Converts the inner list of `Command`s generated via `fill` to a list of
     /// `RenderPassCommand`s that are easily digestible by a `wgpu::RenderPass` produced by a
     /// `wgpu::CommandEncoder`.
-    pub fn render(&mut self, device: &wgpu::Device, image_map: &image::Map<Image>) -> Render {
+    ///
+    /// Returns `None` if there are no vertices to render.
+    pub fn render(
+        &mut self,
+        device: &wgpu::Device,
+        image_map: &image::Map<Image>,
+    ) -> Option<Render> {
         let mut commands = vec![];
+
+        if self.mesh.vertices().is_empty() {
+            return None;
+        }
 
         // Ensure we have a descriptor set ready for each image in the map and no more.
         self.bind_groups.retain(|k, _| image_map.contains_key(k));
@@ -332,11 +338,11 @@ impl Renderer {
             }
         }
 
-        Render {
+        Some(Render {
             pipeline: &self.render_pipeline,
             vertex_buffer,
             commands,
-        }
+        })
     }
 }
 
@@ -625,7 +631,5 @@ fn render_pipeline(
 fn slice_as_bytes<T>(s: &[T]) -> &[u8] {
     let len = std::mem::size_of::<T>() * s.len();
     let ptr = s.as_ptr() as *const u8;
-    unsafe {
-        std::slice::from_raw_parts(ptr, len)
-    }
+    unsafe { std::slice::from_raw_parts(ptr, len) }
 }
