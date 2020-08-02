@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "conrod",
     "conrod_core",
     "conrod_derive",
     "backends/conrod_example_shared",
